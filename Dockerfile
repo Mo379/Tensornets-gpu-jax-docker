@@ -13,7 +13,7 @@ RUN apt-get -y install apt-utils vim curl git tar
 RUN pip install --upgrade pip
 #Add installation files
 WORKDIR /workspace/APP
-ADD ./APP/ /workspace/APP
+#ADD ./APP/ /workspace/APP
 ADD ./extras/shell/ /workspace/shell
 ADD ./extras/includes/ /workspace/includes
 ADD ./extras/lib/ /workspace/lib

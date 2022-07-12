@@ -13,6 +13,7 @@ import optax
 import jax 
 import jax.numpy as jnp
 import acme
+from acme import wrappers as acmewrappers
 #Env
 from pettingzoo.butterfly import pistonball_v6
 import supersuit as ss
@@ -83,7 +84,7 @@ def environment_setup(test=True):
         num_cpus=num_cpus, 
         base_class='stable_baselines3'
     )
-    env = acme.wrappers.GymWrapper(env)
+    env = acmewrappers.GymWrapper(env)
     return env
 def play_enviromnet_setup():
     env = pistonball_v6.env(n_pistons=20)

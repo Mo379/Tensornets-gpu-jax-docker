@@ -44,7 +44,7 @@ eval_interval=num_agent_steps//10
 num_eval_episodes = 5
 save_params=True
 #
-track = True
+track = False
 
 
 #main
