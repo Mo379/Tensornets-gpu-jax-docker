@@ -1,11 +1,12 @@
 from absl import flags
 from acme.agents.jax import ppo
-import src.helpers as helpers
 from absl import app
 from acme.jax import experiments
 from acme.utils import lp_utils
 import launchpad as lp
 
+import src.helpers as helpers
+from src.util import environment_setup 
 FLAGS = flags.FLAGS
 
 flags.DEFINE_bool(
@@ -21,15 +22,13 @@ flags.DEFINE_integer('evaluation_episodes', 10, 'Evaluation episodes.')
 def build_experiment_config():
   """Builds PPO experiment config which can be executed in different ways."""
   # Create an environment, grab the spec, and use it to create networks.
-  suite, task = FLAGS.env_name.split(':', 1)
-
   config = ppo.PPOConfig(entropy_cost=0, learning_rate=1e-4)
   ppo_builder = ppo.PPOBuilder(config)
 
   layer_sizes = (256, 256, 256)
   return experiments.ExperimentConfig(
       builder=ppo_builder,
-      environment_factory=lambda seed: helpers.make_environment(suite, task),
+      environment_factory=lambda seed: environment_setup(test=True),
       network_factory=lambda spec: ppo.make_networks(spec, layer_sizes),
       seed=FLAGS.seed,
       max_num_actor_steps=FLAGS.num_steps)

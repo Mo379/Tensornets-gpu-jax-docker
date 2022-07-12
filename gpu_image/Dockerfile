@@ -1,11 +1,12 @@
 #seed
-FROM python:3.8-bullseye
+FROM nvidia/cuda:11.7.0-devel-ubuntu20.04
 #setup
 ENV TZ=Europe/Minsk
 ENV DEBIAN_FRONTEND=noninteractive 
 #Python
 RUN apt-get update
 RUN apt update 
+RUN ln /usr/bin/pip3 /usr/bin/pip
 RUN pip install --upgrade pip
 RUN apt-get update
 RUN apt-get -y install apt-utils vim curl git tar
@@ -21,6 +22,7 @@ ADD ./extras/tests/ /workspace/tests
 RUN chmod +x /workspace/shell/*
 RUN chmod +x /workspace/tests/*
 #Run shell scripts
+RUN /workspace/shell/cuda.sh
 RUN /workspace/shell/requirements.sh
 RUN /workspace/shell/jax.sh
 # Tests
