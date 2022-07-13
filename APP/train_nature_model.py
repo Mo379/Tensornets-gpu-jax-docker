@@ -21,41 +21,32 @@ from acme.jax import utils
 
 import haiku as hk
 from acme.specs import EnvironmentSpec
+from gym.spaces.box import Box
 
 FLAGS = flags.FLAGS
 
 flags.DEFINE_bool(
     'run_distributed', True, 'Should an agent be executed in a '
     'distributed way (the default is a single-threaded agent)')
-flags.DEFINE_string('env_name', 'gym:HalfCheetah-v2', 'What environment to run')
 flags.DEFINE_integer('seed', 0, 'Random seed.')
-flags.DEFINE_integer('num_steps', 1_000, 'Number of env steps to run.')
-flags.DEFINE_integer('eval_every', 100, 'How often to run evaluation.')
+flags.DEFINE_integer('num_steps', 5_000, 'Number of env steps to run.')
+flags.DEFINE_integer('eval_every', 500, 'How often to run evaluation.')
 flags.DEFINE_integer('evaluation_episodes', 10, 'Evaluation episodes.')
 
 
-env = environment_setup(test=True)
+
+env = environment_setup()
 state =env.reset()
+observation, reward, done, info = env.step(np.zeros(shape=(20,1), dtype=np.float32))
+#
+reward_spec = specs.Array(shape=(20,), dtype=np.float32,name='reward')
+discount_spec = specs.BoundedArray(shape=(20,), dtype=np.float32,name='discount',minimum=0.0,maximum=1.0)
 environment_spec= EnvironmentSpec(
     observations=env.observation_spec(),
     actions=env.action_spec(),
-    rewards=env.reward_spec(),
-    discounts=env.discount_spec()
+    rewards=reward_spec,
+    discounts=discount_spec
 )
-print(environment_spec)
-#exit()
-
-
-
-
-
-
-
-print('actions:\n', environment_spec.actions, '\n')
-print('observations:\n', environment_spec.observations.shape, '\n')
-print('states:\n', state.observation.shape, state.observation.flatten().shape, '\n')
-print('rewards:\n', environment_spec.rewards, '\n')
-print('discounts:\n', environment_spec.discounts, '\n')
 
 def my_net_factory(environment_spec):
     # Transform into pure functions.
@@ -69,32 +60,22 @@ def my_net_factory(environment_spec):
     network = ppo.make_ppo_networks(network)
     return network
 
-def build_experiment_config(env_spec):
+def build_experiment_config():
   """Builds PPO experiment config which can be executed in different ways."""
   # Create an environment, grab the spec, and use it to create networks.
   config = ppo.PPOConfig(entropy_cost=0, learning_rate=1e-4)
   ppo_builder = ppo.PPOBuilder(config)
-
   return experiments.ExperimentConfig(
       builder=ppo_builder,
-      environment_spec=env_spec,
-      environment_factory=lambda seed: environment_setup(test=True),
+      #environment_spec = my_env_spec,
+      environment_factory=lambda seed: environment_setup(),
       network_factory=lambda spec: my_net_factory(spec),
       seed=FLAGS.seed,
       max_num_actor_steps=FLAGS.num_steps)
 
 
 def main(_):
-    env = environment_setup(test=True) 
-    environment_spec= EnvironmentSpec(
-        observations=env.observation_spec(),
-        actions=env.action_spec(),
-        rewards=env.reward_spec(),
-        discounts=env.discount_spec()
-    )
-    env.close()
-    #
-    config = build_experiment_config(environment_spec)
+    config = build_experiment_config()
     if FLAGS.run_distributed:
         program = experiments.make_distributed_experiment(
             experiment=config, num_actors=4)

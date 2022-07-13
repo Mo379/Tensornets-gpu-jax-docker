@@ -6,6 +6,7 @@ import jax.numpy as jnp
 import numpy as np
 from numbers import Real
 import distrax
+from acme.jax import networks as networks_lib
 
 
 #model building blocks
@@ -77,14 +78,16 @@ def value_net(x):
         name='value_net')(x)
     return value_out
 #distribution layer
+#distribution layer
 class log_std(hk.Module):
-  def __init__(self, deterministic=False, name=None):
+  def __init__(self, name=None):
     super().__init__(name=name)
   def __call__(self, actions_means):
     sd = hk.get_parameter("constant", shape=(1,), dtype=actions_means.dtype, init=jnp.zeros)
+    dist = distrax.MultivariateNormalDiag(actions_means,jnp.ones_like(actions_means)*jnp.exp(sd))
+    #dist = networks_lib.MultivariateNormalDiagHead(1)
     #
-    return actions_means, sd
-
+    return dist
 
 
 
@@ -98,6 +101,6 @@ def my_model(x):
     values = value_net(features)
     action_mean = policy_net(features)
     #
-    actions, log_sd= log_std(name='log_std')(action_mean)
+    dist = log_std(name='log_std')(action_mean)
     #
-    return actions,values,log_sd
+    return dist,values
