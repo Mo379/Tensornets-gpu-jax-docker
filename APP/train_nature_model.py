@@ -26,12 +26,12 @@ from gym.spaces.box import Box
 FLAGS = flags.FLAGS
 
 flags.DEFINE_bool(
-    'run_distributed', True, 'Should an agent be executed in a '
+    'run_distributed', False, 'Should an agent be executed in a '
     'distributed way (the default is a single-threaded agent)')
 flags.DEFINE_integer('seed', 0, 'Random seed.')
 flags.DEFINE_integer('num_steps', 5_000, 'Number of env steps to run.')
 flags.DEFINE_integer('eval_every', 500, 'How often to run evaluation.')
-flags.DEFINE_integer('evaluation_episodes', 10, 'Evaluation episodes.')
+flags.DEFINE_integer('evaluation_episodes', 3, 'Evaluation episodes.')
 
 
 
