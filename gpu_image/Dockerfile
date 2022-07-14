@@ -6,7 +6,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 #Python
 RUN apt-get update
 RUN apt update 
-RUN ln /usr/bin/pip3 /usr/bin/pip
+RUN apt update && apt install python3-pip -y
+#RUN ln /usr/bin/pip3 /usr/bin/pip
 RUN pip install --upgrade pip
 RUN apt-get update
 RUN apt-get -y install apt-utils vim curl git tar
